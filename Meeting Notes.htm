@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Nadeen Tabulog">
+<title>MoM Notepad - PH Implementation Team</title>
+
+<style>
+    body {
+        font-family: Aptos Display, sans-serif;
+        background-color: #d6eaff;
+        color: black;
+        margin: 20px;
+    }
+    label {
+        font-weight: bold;
+    }
+    input, textarea, select {
+        font-family: Aptos Display, sans-serif;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+    input[readonly] {
+        background-color: #f0f0f0;
+        color: #333;
+    }
+    .inline-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+    .inline-item {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 200px;
+    }
+    button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        background-color: #6c63ff;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+    button:hover {
+        background-color: #584edc;
+    }
+    footer {
+        margin-top: 20px;
+        text-align: center;
+        font-size: small;
+        color: gray;
+    }
+</style>
+
+<script>
+let consultantName = "";
+
+window.onload = function () {
+    // Open new window
+    if (window.top === window.self) {
+        const popup = window.open(window.location.href, "_blank", "width=900,height=700,top=100,left=100");
+        if (popup) {
+            window.close();
+            return;
+        } else {
+            alert("Pop-up blocked! The form will open here instead.");
+        }
+    }
+
+    consultantName = prompt("Please enter your name as the consultant:");
+    if (!consultantName || consultantName.trim() === "") {
+        consultantName = "Unknown Consultant";
+    }
+    document.getElementById('consultantName').value = consultantName;
+
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('time').value = `${hours}:${minutes}`;
+};
+
+function clearForm() {
+    const confirmation = confirm("Make sure that the details are saved before clearing the form.");
+    if (confirmation) {
+        document.getElementById('form').reset();
+        document.getElementById('consultantName').value = consultantName;
+
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('time').value = `${hours}:${minutes}`;
+    }
+}
+
+function generateWord() {
+    const clientName = document.getElementById('clientName').value.trim();
+    const date = document.getElementById('date').value.trim();
+    const time = document.getElementById('time').value.trim();
+    const durationHours = document.getElementById('durationHours').value.trim();
+    const attendees = document.getElementById('attendees').value.trim();
+    const purpose = document.getElementById('purpose').value.trim();
+    const module = document.getElementById('module').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+
+    if (!clientName || !date || !time || !attendees || !purpose || !notes) {
+        alert("Please fill in all required fields before generating the file.");
+        return;
+    }
+
+    const duration = `${durationHours || "0"} hours`;
+
+    const content = `Consultant: ${consultantName}
+Client Name: ${clientName}
+Meeting Date: ${date}
+Time: ${time}
+Duration: ${duration}
+Attendees: ${attendees}
+
+Meeting Purpose: ${purpose}
+Module Discussed: ${module}
+
+Notes:
+${notes}`;
+
+    const formattedDate = date.replace(/-/g, "_");
+    const fileName = `${clientName}_${formattedDate}_MeetingDetails.txt`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+
+    alert(`Your file "${fileName}" has been saved.\n\nCheck your default Downloads folder.`);
+}
+
+window.onbeforeunload = function () {
+    return "Are you sure you want to leave this page? Unsaved changes may be lost.";
+};
+</script>
+</head>
+
+<body>
+<h1 style="color: purple; font-size: 3em; font-family: Aptos Display, sans-serif; animation: blink 5s infinite;">
+    Minutes of the Meeting
+</h1>
+
+<style>
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+</style>
+
+<form id="form">
+    <label for="consultantName">Consultant:</label><br>
+    <input type="text" id="consultantName" name="consultantName" readonly><br><br>
+
+    <label for="clientName">Client Name:</label><br>
+    <input type="text" id="clientName" name="clientName" required><br><br>
+
+    <!-- Date / Time / Duration in one line -->
+    <div class="inline-group">
+        <div class="inline-item">
+            <label for="date">Meeting Date:</label>
+            <input type="date" id="date" name="date" required>
+        </div>
+        <div class="inline-item">
+            <label for="time">Meeting Start Time:</label>
+            <input type="time" id="time" name="time" required>
+        </div>
+        <div class="inline-item">
+            <label for="durationHours">Meeting Duration (Hours):</label>
+            <input type="number" id="durationHours" name="durationHours" placeholder="Enter hours">
+        </div>
+    </div>
+
+    <label for="attendees">Attendees:</label><br>
+    <textarea id="attendees" name="attendees" rows="1" cols="50" placeholder="Enter attendee names, separated by commas" required></textarea><br><br>
+
+    <!-- Meeting Purpose / Module in one line -->
+    <div class="inline-group">
+        <div class="inline-item">
+            <label for="purpose">Meeting Purpose:</label>
+            <select id="purpose" name="purpose" required>
+                <option value="" disabled selected>Select purpose</option>
+                <option value="Quarter 1 - Account Management Meeting">Quarter 1 - Account Management Meeting</option>
+                <option value="Quarter 2 - Account Management Meeting">Quarter 2 - Account Management Meeting</option>
+                <option value="Quarter 3 - Account Management Meeting">Quarter 3 - Account Management Meeting</option>
+                <option value="Quarter 4 - Account Management Meeting">Quarter 4 - Account Management Meeting</option>
+                <option value="Implementation">Implementation</option>
+                <option value="Ticket Discussion">Ticket Discussion</option>
+                <option value="Others - Catch up">Others - Catch up</option>
+            </select>
+        </div>
+        <div class="inline-item">
+            <label for="module">Module Discussed:</label>
+            <select id="module" name="module">
+                <option value="" disabled selected>Select module</option>
+                <option value="Core HR">Core HR</option>
+                <option value="Performance/Talent">Performance/Talent</option>
+                <option value="Development/LMS">Development/LMS</option>
+                <option value="Safety/OHS">Safety/OHS</option>
+                <option value="Engagement">Engagement</option>
+                <option value="Communication">Communication</option>
+                <option value="Governance">Governance</option>
+                <option value="Remuneration">Remuneration</option>
+                <option value="Others">Others</option>
+            </select>
+        </div>
+    </div>
+
+    <label for="notes">Notes:</label><br>
+    <textarea id="notes" name="notes" rows="10" cols="70" placeholder="You are great!" required></textarea><br><br>
+
+    <button type="button" onclick="clearForm()">Clear</button>
+    <button type="button" onclick="generateWord()">Export to Notepad</button>
+</form>
+
+<footer>
+    The strength of your character lies not in how you weather the calm,
+    but in how you rise when the storm tests your resolve. Stand firm with
+    integrity, and let resilience carry you forward.
+</footer>
+</body>
+</html>
